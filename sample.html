@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MT7 Anime</title>
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --muted:#9aa7bf; --accent:#7c3aed;
+    --glass: rgba(255,255,255,0.03);
+    --card-radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    background: linear-gradient(180deg,#071029 0%, #071b2c 60%);
+    color:#e6eef8; -webkit-font-smoothing:antialiased;
+  }
+  header{
+    padding:20px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;
+    border-bottom:1px solid rgba(255,255,255,0.03);backdrop-filter: blur(6px);
+  }
+  h1{margin:0;font-size:20px;letter-spacing:0.2px}
+  .controls{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .search{
+    display:flex;gap:8px;align-items:center;
+    background:var(--glass);padding:8px;border-radius:10px;
+  }
+  .search input{background:transparent;border:0;color:var(--muted);outline:none;width:220px}
+  select, button{
+    background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;
+  }
+  button{cursor:pointer}
+  main{padding:24px;max-width:1200px;margin:0 auto}
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;
+  }
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
+    border-radius:var(--card-radius); overflow:hidden; border:1px solid rgba(255,255,255,0.03);
+    transition:transform .18s ease, box-shadow .18s ease; display:flex;flex-direction:column;
+  }
+  .card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+  .poster{height:240px; display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px}
+  .meta{padding:12px;flex:1;display:flex;flex-direction:column;gap:8px}
+  .title{font-size:15px;color:#eaf3ff;margin:0}
+  .sub{font-size:12px;color:var(--muted);margin:0}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:11px;padding:4px 6px;border-radius:6px;background:rgba(255,255,255,0.02);color:var(--muted)}
+  .small{font-size:12px;color:var(--muted)}
+  footer{padding:18px;text-align:center;color:var(--muted)}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:60}
+  .modal{background:#071124;border-radius:14px;max-width:500px;width:100%;padding:20px;color:#fff}
+  .modal h2{margin-top:0}
+  .modal label{display:block;margin-top:10px}
+  .modal input,.modal textarea{width:100%;padding:8px;border-radius:6px;border:none;margin-top:4px}
+  .modal textarea{resize:vertical}
+</style>
+</head>
+<body>
+<header>
+  <h1>MT7 Anime</h1>
+  <div class="controls">
+    <div class="search">
+      <input id="search" placeholder="Search anime...">
+    </div>
+    <select id="sortSelect">
+      <option value="title-asc">Title ↑</option>
+      <option value="title-desc">Title ↓</option>
+      <option value="year-desc">Year ↓</option>
+      <option value="year-asc">Year ↑</option>
+    </select>
+    <button id="uploadBtn">Upload Anime</button>
+    <button id="clearBtn">Clear</button>
+  </div>
+</header>
+
+<main>
+  <div id="grid" class="grid"></div>
+</main>
+
+<footer>
+  MT7 Anime — Upload and Browse Anime
+</footer>
+
+<!-- Upload Modal -->
+<div id="uploadModal" class="modal-backdrop">
+  <div class="modal">
+    <h2>Upload Anime</h2>
+    <label>Title:<input id="upTitle"></label>
+    <label>Year:<input id="upYear" type="number"></label>
+    <label>Genres (comma-separated):<input id="upGenres"></label>
+    <label>Description:<textarea id="upDesc" rows="4"></textarea></label>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button id="saveAnime">Save</button>
+      <button id="closeUpload">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let animeData = JSON.parse(localStorage.getItem('mt7AnimeData')||'null');
+if(!animeData){
+  animeData = [
+    {id:1,title:"Naruto",year:2002,genres:["Action","Adventure"],desc:"A young ninja seeks recognition and dreams of becoming Hokage."},
+    {id:2,title:"One Piece",year:1999,genres:["Action","Adventure"],desc:"A boy with rubber powers seeks the legendary One Piece treasure."},
+    {id:3,title:"Attack on Titan",year:2013,genres:["Action","Drama"],desc:"Humanity fights giant humanoid Titans behind massive walls."},
+    // ... (keep the other 50+ anime here from before)
+  ];
+}
+let nextId = animeData.length ? Math.max(...animeData.map(a=>a.id))+1 : 1;
+
+const grid = document.getElementById('grid');
+const searchInput = document.getElementById('search');
+const sortSelect = document.getElementById('sortSelect');
+const clearBtn = document.getElementById('clearBtn');
+const uploadBtn = document.getElementById('uploadBtn');
+const uploadModal = document.getElementById('uploadModal');
+const closeUpload = document.getElementById('closeUpload');
+const saveAnime = document.getElementById('saveAnime');
+const upTitle = document.getElementById('upTitle');
+const upYear = document.getElementById('upYear');
+const upGenres = document.getElementById('upGenres');
+const upDesc = document.getElementById('upDesc');
+
+function renderGrid(){
+  const q = searchInput.value.trim().toLowerCase();
+  let items = animeData.filter(a => a.title.toLowerCase().includes(q));
+  const sortVal = sortSelect.value;
+  if(sortVal === 'title-asc') items.sort((a,b)=> a.title.localeCompare(b.title));
+  if(sortVal === 'title-desc') items.sort((a,b)=> b.title.localeCompare(a.title));
+  if(sortVal === 'year-asc') items.sort((a,b)=> a.year - b.year);
+  if(sortVal === 'year-desc') items.sort((a,b)=> b.year - a.year);
+  grid.innerHTML = '';
+  items.forEach(a=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="poster" style="background:#7c3aed;color:white;display:flex;align-items:center;justify-content:center">${a.title[0]}</div>
+                      <div class="meta">
+                        <h3 class="title">${a.title}</h3>
+                        <p class="sub">${a.year} • ${a.genres.join(', ')}</p>
+                        <div class="small">${a.desc}</div>
+                      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function saveData(){
+  localStorage.setItem('mt7AnimeData', JSON.stringify(animeData));
+}
+
+searchInput.addEventListener('input', renderGrid);
+sortSelect.addEventListener('change', renderGrid);
+clearBtn.addEventListener('click', ()=>{searchInput.value=''; sortSelect.value='title-asc'; renderGrid();});
+
+uploadBtn.addEventListener('click', ()=>{uploadModal.style.display='flex';});
+closeUpload.addEventListener('click', ()=>{uploadModal.style.display='none';});
+
+saveAnime.addEventListener('click', ()=>{
+  const title = upTitle.value.trim();
+  const year = parseInt(upYear.value.trim());
+  const genres = upGenres.value.split(',').map(g=>g.trim()).filter(Boolean);
+  const desc = upDesc.value.trim();
+  if(!title || !year || !desc) return alert('Please fill all fields');
+  animeData.push({id:nextId++, title, year, genres, desc});
+  saveData();
+  renderGrid();
+  upTitle.value=''; upYear.value=''; upGenres.value=''; upDesc.value='';
+  uploadModal.style.display='none';
+});
+
+renderGrid();
+</script>
+</body>
+</html>
