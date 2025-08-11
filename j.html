@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="episode-title-tag">MT7 - Episode Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General Styles */
+        :root {
+            --bg-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --secondary-text-color: #a0a0a0;
+            --accent-color: #ff5252;
+            --accent-hover: #e64a4a;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --header-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--card-bg-color);
+            border-bottom: 1px solid #333;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: var(--header-height);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo a {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-item {
+            margin: 0 1rem;
+        }
+
+        .nav-item a {
+            padding: 10px;
+            display: block;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .nav-item a:hover {
+            color: var(--accent-color);
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input {
+            padding: 8px 12px;
+            border: 1px solid #444;
+            background-color: #2a2a2a;
+            color: var(--text-color);
+            border-radius: 5px 0 0 5px;
+            outline: none;
+            width: 250px;
+            transition: width 0.3s;
+        }
+        
+        .search-container input:focus {
+            width: 300px;
+        }
+
+        .search-container button {
+            background-color: var(--accent-color);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1300px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .episode-player-section {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        
+        .episode-main {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .video-container {
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            position: relative;
+            background-color: black;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .video-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .episode-info h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .episode-info p {
+            font-size: 1rem;
+            color: var(--secondary-text-color);
+        }
+        
+        .episodes-list-sidebar {
+            width: 300px;
+            background-color: var(--card-bg-color);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .episodes-list-sidebar h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .episodes-list {
+            list-style: none;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .episode-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .episode-item a {
+            display: block;
+            padding: 0.75rem 1rem;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .episode-item a:hover {
+            background-color: var(--accent-color);
+        }
+
+        .footer {
+            background-color: var(--card-bg-color);
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid #333;
+            margin-top: 2rem;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links li {
+            margin: 0 1rem;
+        }
+
+        .footer-links a {
+            color: var(--secondary-text-color);
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <a href="index.html">MT7</a>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html">Home</a></li>
+                <li class="nav-item"><a href="#">Anime List</a></li>
+                <li class="nav-item"><a href="#">Genres</a></li>
+            </ul>
+        </nav>
+        <div class="search-container">
+            <input type="text" placeholder="Search for anime...">
+            <button><i class="fas fa-search"></i></button>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <section class="episode-player-section">
+            
+            <div class="episode-main">
+                <div class="video-container">
+                    <video id="video-player" class="video-player" controls autoplay>
+                        <source src="" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                
+                <div class="episode-info">
+                    <h1 id="anime-title">Anime Title - Episode #</h1>
+                    <p id="episode-description">Description of the episode goes here...</p>
+                </div>
+            </div>
+
+            <aside class="episodes-list-sidebar">
+                <h3>Episodes</h3>
+                <ul id="episodes-list" class="episodes-list">
+                    </ul>
+            </aside>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <ul class="footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">DMCA</a></li>
+        </ul>
+        <p>&copy; 2024 MT7. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Dummy data simulating a database lookup for one anime series
+        const animeData = {
+            id: 1,
+            title: "Attack on Titan",
+            description: "Eren Yeager and the Survey Corps fight against the Titans. This season explores the truths of the world outside the walls.",
+            episodes: [
+                { id: 1, title: "The Other Side of the Sea", episodeNum: 60, videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
+                { id: 2, title: "Midnight Train", episodeNum: 61, videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
+                { id: 3, title: "The Door of Hope", episodeNum: 62, videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
+                { id: 4, title: "From One Hand to Another", episodeNum: 63, videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
+                { id: 5, title: "A Sound Argument", episodeNum: 64, videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
+                { id: 6, title: "The Warhammer Titan", episodeNum: 65, videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
+                { id: 7, title: "Assault", episodeNum: 66, videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
+            ]
+        };
+
+        // Get the episode ID from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const episodeId = parseInt(urlParams.get('id'));
+
+        // Find the episode in our dummy data
+        const currentEpisode = animeData.episodes.find(ep => ep.id === episodeId);
+
+        if (currentEpisode) {
+            // Update the page content with the episode's data
+            document.getElementById('episode-title-tag').textContent = MT7 - ${animeData.title} - EP ${currentEpisode.episodeNum};
+            document.getElementById('anime-title').textContent = ${animeData.title} - Episode ${currentEpisode.episodeNum}: ${currentEpisode.title};
+            document.getElementById('episode-description').textContent = animeData.description;
+            document.getElementById('video-player').src = currentEpisode.videoUrl;
+
+            // Generate the list of episodes
+            const episodesList = document.getElementById('episodes-list');
+            episodesList.innerHTML = ''; // Clear any existing content
+            animeData.episodes.forEach(ep => {
+                const li = document.createElement('li');
+                li.classList.add('episode-item');
+                li.innerHTML = `
+                    <a href="episode.html?id=${ep.id}">
+                        Episode ${ep.episodeNum}: ${ep.title}
+                    </a>
+                `;
+                episodesList.appendChild(li);
+            });
+        } else {
+            // Handle case where episode is not found
+            document.getElementById('anime-title').textContent = "Episode Not Found";
+            document.getElementById('episode-description').textContent = "The episode you are looking for does not exist.";
+        }
+
+    </script>
+</body>
+</html>
