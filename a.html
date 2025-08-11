@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MT7 — Legal Anime Catalog</title>
+<meta name="description" content="MT7 — Personal anime catalog. Add titles, store legal links or local files, search, filter and play trailers or your own files.">
+<style>
+  :root{
+    --bg:#071122; --card:#0b1220; --muted:#9aa7bf; --accent:#7c3aed;
+    --glass: rgba(255,255,255,0.03);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#041024,#081426);color:#eaf2ff}
+  header{display:flex;align-items:center:gap:14px;padding:18px;border-bottom:1px solid rgba(255,255,255,0.03)}
+  h1{margin:0;font-size:20px}
+  .controls{margin-left:auto;display:flex;gap:8px;align-items:center}
+  input[type="search"], select, button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--muted)}
+  button{cursor:pointer}
+  main{max-width:1200px;margin:22px auto;padding:0 18px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));border-radius:var(--radius);overflow:hidden;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;transition:transform .15s}
+  .card:hover{transform:translateY(-6px)}
+  .poster{height:260px;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:10px}
+  .poster .badge{background:rgba(0,0,0,0.45);padding:6px 8px;border-radius:8px;font-size:12px}
+  .meta{padding:12px;display:flex;flex-direction:column;gap:8px}
+  .title{font-weight:700;margin:0;color:#eaf3ff;font-size:15px}
+  .sub{margin:0;color:var(--muted);font-size:12px}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:11px;padding:4px 6px;border-radius:6px;background:rgba(255,255,255,0.02);color:var(--muted)}
+  .actions{display:flex;gap:8px;align-items:center;margin-top:auto}
+  .fav{margin-left:auto;padding:6px 8px;border-radius:8px;border:none;background:transparent;color:var(--muted)}
+  footer{text-align:center;padding:18px;color:var(--muted)}
+  .modal-backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(0,0,0,0.6),rgba(0,0,0,0.8));z-index:60;padding:18px}
+  .modal{background:linear-gradient(180deg,#071124,#081226);border-radius:12px;max-width:960px;width:100%;max-height:92vh;overflow:auto;padding:18px;border:1px solid rgba(255,255,255,0.04);display:flex;gap:16px}
+  .modal .left{min-width:280px}
+  .modal .poster-large{height:420px;border-radius:8px;background-size:cover;background-position:center}
+  .modal .right{flex:1;color:var(--muted)}
+  label{display:block;margin-top:10px;color:var(--muted);font-size:13px}
+  input,textarea,select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#eaf3ff}
+  textarea{resize:vertical}
+  .uploader{display:flex;gap:8px;align-items:center}
+  .link-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .lk{padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .play-btn{padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+  /* responsive */
+  @media (max-width:800px){ .modal{flex-direction:column} .poster-large{height:260px} .poster{height:180px} }
+  .note{font-size:13px;color:#cbd8f0;margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden><rect width="24" height="24" rx="6" fill="#071226"/><path d="M4 8c4 3 8 3 12 0" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round"/></svg>
+  <h1>MT7 — Legal Anime Catalog</h1>
+  <div class="controls" role="toolbar">
+    <input id="search" type="search" placeholder="Search titles..." aria-label="Search titles">
+    <select id="genreSelect"><option value="">All genres</option></select>
+    <select id="sort"><option value="title-asc">Title ↑</option><option value="title-desc">Title ↓</option><option value="year-desc">Year ↓</option><option value="year-asc">Year ↑</option></select>
+    <button id="addBtn">Add / Upload</button>
+  </div>
+</header>
+
+<main>
+  <div id="grid" class="grid" aria-live="polite"></div>
+  <div id="nores" style="display:none;padding:28px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:center;color:var(--muted);margin-top:12px">No results</div>
+</main>
+
+<footer>MT7 — Use only legal sources. Do not upload or link pirated content.</footer>
+
+<!-- Modal: details + player -->
+<div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div class="modal" role="document">
+    <div class="left">
+      <div id="modalPoster" class="poster-large"></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button id="openPlayer" class="play-btn">Play Selected</button>
+        <button id="closeModal" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted)">Close</button>
+      </div>
+      <div class="note">Player plays local files you upload or external links you provide (must be legal).</div>
+    </div>
+    <div class="right">
+      <h2 id="modalTitle" style="margin:0;color:#eaf3ff"></h2>
+      <p id="modalMeta" class="note"></p>
+      <p id="modalDesc" style="line-height:1.5;color:var(--muted)"></p>
+
+      <div style="margin-top:12px">
+        <strong style="color:#dfeeff">Sources / Links</strong>
+        <div id="links" class="link-list"></div>
+      </div>
+
+      <div style="margin-top:12px">
+        <strong style="color:#dfeeff">Upload / Attach (your own files)</strong>
+        <div class="uploader">
+          <input id="fileAttach" type="file" accept="video/*">
+          <button id="attachBtn" class="play-btn">Attach</button>
+        </div>
+        <div id="attachedInfo" class="note"></div>
+      </div>
+
+      <hr style="margin:14px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+      <div>
+        <strong style="color:#dfeeff">Manage</strong>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="editBtn" style="padding:8px 12px;border-radius:8px">Edit</button>
+          <button id="favBtn" class="fav">❤ Favorite</button>
+          <button id="deleteBtn" style="padding:8px 12px;border-radius:8px">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: add/edit -->
+<div id="addBackdrop" class="modal-backdrop">
+  <div class="modal" style="max-width:640px">
+    <div style="flex:1">
+      <h2 id="addTitle">Add Anime</h2>
+      <label>Title<input id="aTitle" placeholder="Title"></label>
+      <label>Year<input id="aYear" type="number" placeholder="e.g. 2019"></label>
+      <label>Genres (comma-separated)<input id="aGenres" placeholder="Action,Fantasy"></label>
+      <label>Description<textarea id="aDesc" rows="4"></textarea></label>
+      <label>Poster URL (optional)<input id="aPoster" placeholder="https://..."></label>
+      <label>External Source URL (optional)<input id="aSource" placeholder="Official streaming page or trailer link"></label>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button id="saveAdd" class="play-btn">Save</button>
+        <button id="cancelAdd" style="padding:8px 12px;border-radius:8px">Cancel</button>
+      </div>
+      <div class="note">Only add links to legal/official pages (Crunchyroll, Funimation, Netflix, official YouTube trailers, etc.).</div>
+    </div>
+  </div>
+</div>
+
+<!-- Player overlay -->
+<div id="playerBackdrop" class="modal-backdrop" style="align-items:flex-end;padding:0">
+  <div style="width:100%;max-width:980px;background:transparent;padding:12px;box-sizing:border-box">
+    <div style="background:#01050a;border-radius:10px;padding:10px;border:1px solid rgba(255,255,255,0.04)">
+      <video id="player" controls style="width:100%;max-height:70vh;background:black;border-radius:8px"></video>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button id="closePlayer" style="padding:8px 12px;border-radius:8px">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* -----------------------
+   Data: sample anime list
+   (You may expand or replace sources)
+   ----------------------- */
+const initialData = [
+  {id:1,title:"Naruto",year:2002,genres:["Action","Adventure"],desc:"A young ninja seeks recognition and dreams of becoming Hokage.",poster:null, sources:["https://official.example/naruto"]},
+  {id:2,title:"One Piece",year:1999,genres:["Action","Adventure"],desc:"A boy with rubber powers seeks the legendary One Piece treasure.",poster:null, sources:["https://official.example/onepiece"]},
+  {id:3,title:"Attack on Titan",year:2013,genres:["Action","Drama"],desc:"Humanity fights giant Titans behind massive walls.",poster:null, sources:["https://official.example/aot"]},
+  {id:4,title:"Death Note",year:2006,genres:["Mystery","Supernatural"],desc:"A notebook lets a student kill anyone by writing their name.",poster:null, sources:["https://official.example/deathnote"]},
+  {id:5,title:"Fullmetal Alchemist: Brotherhood",year:2009,genres:["Action","Fantasy"],desc:"Two brothers search for the Philosopher's Stone.",poster:null, sources:["https://official.example/fmab"]},
+  {id:6,title:"My Hero Academia",year:2016,genres:["Action","Superhero"],desc:"A powerless boy enrolls in a school for heroes.",poster:null, sources:["https://official.example/mha"]},
+  {id:7,title:"Demon Slayer",year:2019,genres:["Action","Fantasy"],desc:"A swordsman fights demons while seeking a cure for his sister.",poster:null, sources:["https://official.example/demonslayer"]},
+  {id:8,title:"Cowboy Bebop",year:1998,genres:["Sci-Fi","Noir"],desc:"Bounty hunters travel the solar system.",poster:null, sources:["https://official.example/cowboybebop"]},
+  {id:9,title:"Steins;Gate",year:2011,genres:["Sci-Fi","Thriller"],desc:"Time travel and its consequences.",poster:null, sources:["https://official.example/steinsgate"]},
+  {id:10,title:"Hunter x Hunter",year:1999,genres:["Adventure","Fantasy"],desc:"A boy becomes a Hunter to find his father.",poster:null, sources:["https://official.example/hxh"]},
+  // ... add more entries as needed
+];
+
+/* -----------------------
+   Storage & state
+   ----------------------- */
+const STORAGE_KEY = 'mt7_catalog_v1';
+let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || initialData.slice();
+let favorites = JSON.parse(localStorage.getItem('mt7_favs')||'[]');
+
+let currentItem = null;
+let attachedFileMap = {}; // id -> {name, blobUrl}
+
+/* -----------------------
+   DOM refs
+   ----------------------- */
+const grid = document.getElementById('grid');
+const searchInput = document.getElementById('search');
+const genreSelect = document.getElementById('genreSelect');
+const sortSelect = document.getElementById('sort');
+const addBtn = document.getElementById('addBtn');
+const nores = document.getElementById('nores');
+
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalPoster = document.getElementById('modalPoster');
+const modalTitle = document.getElementById('modalTitle');
+const modalMeta = document.getElementById('modalMeta');
+const modalDesc = document.getElementById('modalDesc');
+const linksDiv = document.getElementById('links');
+const fileAttach = document.getElementById('fileAttach');
+const attachBtn = document.getElementById('attachBtn');
+const attachedInfo = document.getElementById('attachedInfo');
+const openPlayer = document.getElementById('openPlayer');
+const closeModal = document.getElementById('closeModal');
+const favBtn = document.getElementById('favBtn');
+const deleteBtn = document.getElementById('deleteBtn');
+const editBtn = document.getElementById('editBtn');
+
+const addBackdrop = document.getElementById('addBackdrop');
+const addTitle = document.getElementById('addTitle');
+const aTitle = document.getElementById('aTitle');
+const aYear = document.getElementById('aYear');
+const aGenres = document.getElementById('aGenres');
+const aDesc = document.getElementById('aDesc');
+const aPoster = document.getElementById('aPoster');
+const aSource = document.getElementById('aSource');
+const saveAdd = document.getElementById('saveAdd');
+const cancelAdd = document.getElementById('cancelAdd');
+
+const playerBackdrop = document.getElementById('playerBackdrop');
+const player = document.getElementById('player');
+const closePlayer = document.getElementById('closePlayer');
+
+/* -----------------------
+   Helpers
+   ----------------------- */
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); localStorage.setItem('mt7_favs', JSON.stringify(favorites)); }
+function makePosterURL(title,id,poster){
+  if(poster) return poster;
+  const initials = (title.split(' ').slice(0,2).map(w=>w[0]).join('')||title[0]).toUpperCase();
+  const hue = (id*47)%360;
+  const svg = <svg xmlns='http://www.w3.org/2000/svg' width='800' height='1120'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop offset='0' stop-color='hsl(${hue} 65% 60%)'/><stop offset='1' stop-color='hsl(${(hue+40)%360} 65% 45%)'/></linearGradient></defs><rect width='100%' height='100%' fill='url(#g)' rx='24'/><text x='50%' y='60%' font-size='120' font-family=Arial fill='rgba(255,255,255,0.95)' text-anchor='middle' dominant-baseline='middle' font-weight='700'>${initials}</text><text x='50%' y='92%' font-size='30' fill='rgba(255,255,255,0.9)' text-anchor='middle' font-family=Arial>${escapeHtml(title)}</text></svg>;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+function escapeHtml(s){ return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function idForNew(){ return data.length ? Math.max(...data.map(x=>x.id))+1 : 1; }
+
+/* -----------------------
+   Render
+   ----------------------- */
+function buildGenres(){
+  const g = Array.from(new Set(data.flatMap(d=>d.genres))).sort();
+  genreSelect.innerHTML = '<option value="">All genres</option>' + g.map(x=><option value="${x}">${x}</option>).join('');
+}
+
+function renderCard(item){
+  const el = document.createElement('article');
+  el.className = 'card';
+  const posterURL = makePosterURL(item.title,item.id,item.poster);
+  el.innerHTML = `
+    <div class="poster" style="background-image:url('${posterURL}')">
+      <div class="badge">${item.year}</div>
+    </div>
+    <div class="meta">
+      <h3 class="title">${escapeHtml(item.title)}</h3>
+      <p class="sub">${escapeHtml(item.genres.join(', '))}</p>
+      <div style="flex:1;color:var(--muted);font-size:13px">${escapeHtml(item.desc || '')}</div>
+      <div class="actions">
+        <button class="play-btn view" data-id="${item.id}">View</button>
+        <button class="fav" data-id="${item.id}">${favorites.includes(item.id)?'❤ Favorited':'♡ Favorite'}</button>
+      </div>
+    </div>`;
+  // actions
+  el.querySelector('.view').addEventListener('click', ()=> openModal(item.id));
+  el.querySelector('.fav').addEventListener('click', (e)=>{ e.stopPropagation(); toggleFav(item.id); renderGrid(); });
+  return el;
+}
+
+function renderGrid(){
+  const q = (searchInput.value||'').trim().toLowerCase();
+  const genre = genreSelect.value;
+  let items = data.filter(d => (!q || d.title.toLowerCase().includes(q) || (d.desc||'').toLowerCase().includes(q)) && (!genre || d.genres.includes(genre)));
+  const sort = sortSelect.value;
+  if(sort === 'title-asc') items.sort((a,b)=>a.title.localeCompare(b.title));
+  if(sort === 'title-desc') items.sort((a,b)=>b.title.localeCompare(a.title));
+  if(sort === 'year-asc') items.sort((a,b)=> (a.year||0)-(b.year||0));
+  if(sort === 'year-desc') items.sort((a,b)=> (b.year||0)-(a.year||0));
+  grid.innerHTML = '';
+  if(items.length===0){ nores.style.display='block'; return; } else nores.style.display='none';
+  const frag = document.createDocumentFragment();
+  for(const it of items) frag.appendChild(renderCard(it));
+  grid.appendChild(frag);
+}
+
+/* -----------------------
+   Modal & Player handling
+   ----------------------- */
+function openModal(id){
+  const item = data.find(x=>x.id===id); if(!item) return;
+  currentItem = item;
+  modalPoster.style.backgroundImage = url('${makePosterURL(item.title,item.id,item.poster)}');
+  modalTitle.textContent = item.title;
+  modalMeta.textContent = ${item.year || '—'} • ${item.genres.join(' • ')};
+  modalDesc.textContent = item.desc || '';
+  renderLinks(item);
+  attachedInfo.textContent = attachedFileMap[item.id] ? Attached: ${attachedFileMap[item.id].name} : 'No attached local file';
+  favBtn.textContent = favorites.includes(item.id) ? '❤ Favorited' : '♡ Favorite';
+  modalBackdrop.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeModalFunc(){ modalBackdrop.style.display = 'none'; document.body.style.overflow = ''; currentItem=null; }
+closeModal.addEventListener('click', closeModalFunc);
+modalBackdrop.addEventListener('click', (e)=>{ if(e.target===modalBackdrop) closeModalFunc(); });
+
+function renderLinks(item){
+  linksDiv.innerHTML = '';
+  if(item.sources && item.sources.length){
+    item.sources.forEach((s,idx)=>{
+      const a = document.createElement('div'); a.className='lk';
+      const left = document.createElement('div'); left.style.flex='1'; left.textContent = s;
+      const right = document.createElement('div');
+      const btn = document.createElement('button'); btn.className='play-btn'; btn.textContent='Open';
+      btn.addEventListener('click', ()=>{ window.open(s,'_blank') });
+      right.appendChild(btn);
+      a.appendChild(left); a.appendChild(right);
+      linksDiv.appendChild(a);
+    });
+  } else {
+    linksDiv.innerHTML = '<div class="note">No external sources listed for this title.</div>';
+  }
+}
+
+/* Attach local file for a title (for personal use only) */
+attachBtn.addEventListener('click', ()=>{
+  if(!currentItem) return alert('Open an item first');
+  const f = fileAttach.files[0];
+  if(!f) return alert('Choose a local video file to attach');
+  // create blob URL and map it to the item
+  const url = URL.createObjectURL(f);
+  attachedFileMap[currentItem.id] = {name:f.name, url};
+  attachedInfo.textContent = Attached: ${f.name};
+  // optionally persist name only (blob URLs are temporary); we keep in memory for the session
+  // Save a small note in localStorage that a local attach exists (without storing file)
+  localStorage.setItem('mt7_attached_info', JSON.stringify(Object.fromEntries(Object.entries(attachedFileMap).map(([k,v])=>[k,v.name]))));
+});
+
+/* Open player: prefer attached local file, then first external source if it's a direct playable URL (user's responsibility) */
+openPlayer.addEventListener('click', ()=>{
+  if(!currentItem) return;
+  let src = null;
+  if(attachedFileMap[currentItem.id]) src = attachedFileMap[currentItem.id].url;
+  else if(currentItem.sources && currentItem.sources.length) src = currentItem.sources[0];
+
+  if(!src) return alert('No attached file or source available to play.');
+  // If source is external (likely not direct stream), user must ensure it's playable (CORS, direct link, etc.)
+  player.pause();
+  player.src = src;
+  player.load();
+  playerBackdrop.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+});
+closePlayer.addEventListener('click', ()=>{ player.pause(); player.src=''; playerBackdrop.style.display='none'; document.body.style.overflow=''; });
+
+playerBackdrop.addEventListener('click', (e)=>{ if(e.target===playerBackdrop) { player.pause(); player.src=''; playerBackdrop.style.display='none'; document.body.style.overflow=''; } });
+
+/* -----------------------
+   Add / Edit / Delete
+   ----------------------- */
+addBtn.addEventListener('click', ()=>{ openAddModal(); });
+
+function openAddModal(item){
+  if(item){
+    addTitle.textContent = 'Edit Anime';
+    aTitle.value = item.title||'';
+    aYear.value = item.year||'';
+    aGenres.value = (item.genres||[]).join(', ');
+    aDesc.value = item.desc||'';
+    aPoster.value = item.poster||'';
+    aSource.value = (item.sources && item.sources[0]) || '';
+    saveAdd.dataset.editId = item.id;
+  } else {
+    addTitle.textContent = 'Add Anime';
+    aTitle.value=''; aYear.value=''; aGenres.value=''; aDesc.value=''; aPoster.value=''; aSource.value='';
+    delete saveAdd.dataset.editId;
+  }
+  addBackdrop.style.display = 'flex';
+  document.body.style.overflow='hidden';
+}
+cancelAdd.addEventListener('click', ()=>{ addBackdrop.style.display='none'; document.body.style.overflow=''; });
+
+saveAdd.addEventListener('click', ()=>{
+  const title = aTitle.value.trim();
+  const year = parseInt(aYear.value) || null;
+  const genres = aGenres.value.split(',').map(s=>s.trim()).filter(Boolean);
+  const desc = aDesc.value.trim();
+  const poster = aPoster.value.trim() || null;
+  const source = aSource.value.trim() || null;
+
+  if(!title) return alert('Title required');
+  if(saveAdd.dataset.editId){
+    const id = Number(saveAdd.dataset.editId);
+    const item = data.find(x=>x.id===id);
+    if(!item) return alert('Item not found');
+    item.title = title; item.year = year; item.genres = genres; item.desc = desc;
+    if(poster) item.poster = poster;
+    if(source){
+      item.sources = item.sources || [];
+      if(!item.sources.includes(source)) item.sources.unshift(source);
+    }
+  } else {
+    const id = idForNew();
+    data.push({id, title, year, genres, desc, poster: poster||null, sources: source ? [source] : []});
+  }
+  save();
+  buildGenres();
+  renderGrid();
+  addBackdrop.style.display='none';
+  document.body.style.overflow='';
+});
+
+/* Edit / Delete / Favorite from modal */
+editBtn.addEventListener('click', ()=>{
+  if(!currentItem) return;
+  openAddModal(currentItem);
+});
+
+deleteBtn.addEventListener('click', ()=>{
+  if(!currentItem) return;
+  if(!confirm('Delete this entry from your catalog?')) return;
+  data = data.filter(x=>x.id !== currentItem.id);
+  delete attachedFileMap[currentItem.id];
+  save();
+  buildGenres();
+  renderGrid();
+  closeModalFunc();
+});
+
+function toggleFav(id){
+  if(favorites.includes(id)) favorites = favorites.filter(x=>x!==id);
+  else favorites.push(id);
+  save();
+}
+
+/* Favorite button in modal */
+favBtn.addEventListener('click', ()=>{
+  if(!currentItem) return;
+  toggleFav(currentItem.id);
+  favBtn.textContent = favorites.includes(currentItem.id)?'❤ Favorited':'♡ Favorite';
+});
+
+/* -----------------------
+   Init
+   ----------------------- */
+buildGenres();
+renderGrid();
+
+/* wire inputs */
+searchInput.addEventListener('input', debounce(()=>renderGrid(), 180));
+genreSelect.addEventListener('change', renderGrid);
+sortSelect.addEventListener('change', renderGrid);
+
+/* restore attached info note (names only) */
+try{
+  const att = JSON.parse(localStorage.getItem('mt7_attached_info')||'{}');
+  for(const k of Object.keys(att)) attachedFileMap[k] = {name: att[k], url: null};
+} catch(e){}
+
+/* debounce util */
+function debounce(fn,ms=200){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); } }
+</script>
+</body>
+</html>
