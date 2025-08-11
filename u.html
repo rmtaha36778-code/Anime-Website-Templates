@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MT7 - Watch Your Favorite Anime Online</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* (The CSS is the same as the previous response and is omitted for brevity. 
+           Please copy the entire style block from the previous response or the episode.html file.) */
+        :root {
+            --bg-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --secondary-text-color: #a0a0a0;
+            --accent-color: #ff5252;
+            --accent-hover: #e64a4a;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --header-height: 70px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; overflow-x: hidden; }
+        a { text-decoration: none; color: var(--text-color); }
+        .header { background-color: var(--card-bg-color); border-bottom: 1px solid #333; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; height: var(--header-height); position: sticky; top: 0; z-index: 1000; }
+        .logo a { font-size: 1.8rem; font-weight: bold; color: var(--accent-color); }
+        .nav-menu { display: flex; list-style: none; }
+        .nav-item { margin: 0 1rem; }
+        .nav-item a { padding: 10px; display: block; position: relative; transition: color 0.3s; }
+        .nav-item a:hover { color: var(--accent-color); }
+        .search-container { display: flex; align-items: center; }
+        .search-container input { padding: 8px 12px; border: 1px solid #444; background-color: #2a2a2a; color: var(--text-color); border-radius: 5px 0 0 5px; outline: none; width: 250px; transition: width 0.3s; }
+        .search-container input:focus { width: 300px; }
+        .search-container button { background-color: var(--accent-color); border: none; color: white; padding: 8px 12px; border-radius: 0 5px 5px 0; cursor: pointer; }
+        .upload-btn { background-color: #4CAF50; color: white; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer; margin-left: 1rem; }
+        .container { max-width: 1300px; margin: 2rem auto; padding: 0 1rem; }
+        .content-section { margin-bottom: 3rem; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .section-header h2 { font-size: 1.8rem; border-left: 4px solid var(--accent-color); padding-left: 1rem; }
+        .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+        .anime-card { background-color: var(--card-bg-color); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; }
+        .anime-card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); }
+        .anime-card-link { display: block; }
+        .anime-card img { width: 100%; height: 300px; object-fit: cover; display: block; }
+        .card-info { padding: 1rem; text-align: center; }
+        .card-info h3 { font-size: 1.1rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-info p { font-size: 0.9rem; color: var(--secondary-text-color); }
+        .load-more { display: block; width: fit-content; margin: 2rem auto 0; padding: 1rem 2rem; background-color: var(--accent-color); color: white; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: background-color 0.3s; }
+        .load-more:hover { background-color: var(--accent-hover); }
+        .footer { background-color: var(--card-bg-color); padding: 2rem; text-align: center; border-top: 1px solid #333; }
+        .footer-links { list-style: none; display: flex; justify-content: center; margin-bottom: 1rem; }
+        .footer-links li { margin: 0 1rem; }
+        .footer-links a { color: var(--secondary-text-color); transition: color 0.3s; }
+        .footer-links a:hover { color: var(--accent-color); }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <a href="#">MT7</a>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#">Home</a></li>
+                <li class="nav-item"><a href="#">Anime List</a></li>
+                <li class="nav-item"><a href="#">Genres</a></li>
+            </ul>
+        </nav>
+        <div class="search-container">
+            <input type="text" placeholder="Search for anime...">
+            <button><i class="fas fa-search"></i></button>
+            <button id="upload-btn" class="upload-btn">Upload</button>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <section class="content-section">
+            <div class="section-header">
+                <h2>Trending Now</h2>
+            </div>
+            <div id="trending-grid" class="anime-grid">
+                </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-header">
+                <h2>Latest Episodes</h2>
+            </div>
+            <div id="latest-grid" class="anime-grid">
+                </div>
+            <button id="load-more-btn" class="load-more">Load More</button>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <ul class="footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">DMCA</a></li>
+        </ul>
+        <p>&copy; 2024 MT7. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Array of dummy anime data
+        const animeData = [
+            { id: 1, title: 'Attack on Titan', episode: 88, thumbnail: 'https://cdn.myanimelist.net/images/anime/10/47347.jpg' },
+            { id: 2, title: 'Jujutsu Kaisen', episode: 24, thumbnail: 'https://cdn.myanimelist.net/images/anime/1171/109222.jpg' },
+            { id: 3, title: 'One Piece', episode: 1080, thumbnail: 'https://cdn.myanimelist.net/images/anime/6/73245.jpg' },
+            { id: 4, title: 'My Hero Academia', episode: 138, thumbnail: 'https://cdn.myanimelist.net/images/anime/10/78745.jpg' },
+            { id: 5, title: 'Demon Slayer', episode: 44, thumbnail: 'https://cdn.myanimelist.net/images/anime/1286/99889.jpg' },
+            { id: 6, title: 'Chainsaw Man', episode: 12, thumbnail: 'https://cdn.myanimelist.net/images/anime/1594/128074.jpg' },
+            { id: 7, title: 'Hunter x Hunter', episode: 148, thumbnail: 'https://cdn.myanimelist.net/images/anime/1337/99026.jpg' },
+            { id: 8, title: 'Naruto Shippuden', episode: 500, thumbnail: 'https://cdn.myanimelist.net/images/anime/5/17407.jpg' },
+            { id: 9, title: 'Dragon Ball Z', episode: 291, thumbnail: 'https://cdn.myanimelist.net/images/anime/6/20993.jpg' },
+            { id: 10, title: 'Fullmetal Alchemist: Brotherhood', episode: 64, thumbnail: 'https://cdn.myanimelist.net/images/anime/1223/96554.jpg' },
+        ];
+
+        // Function to create an anime card HTML element
+        function createAnimeCard(anime) {
+            const card = document.createElement('div');
+            card.classList.add('anime-card');
+            card.innerHTML = `
+                <a href="episode.html?id=${anime.id}" class="anime-card-link" data-id="${anime.id}">
+                    <img src="${anime.thumbnail}" alt="${anime.title}">
+                </a>
+                <div class="card-info">
+                    <h3>${anime.title}</h3>
+                    <p>Episode ${anime.episode}</p>
+                </div>
+            `;
+            return card;
+        }
+
+        // Function to render anime cards to a specific grid
+        function renderAnime(data, gridId) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            data.forEach(anime => {
+                grid.appendChild(createAnimeCard(anime));
+            });
+        }
+        
+        // Initial render for both sections
+        renderAnime(animeData.slice(0, 5), 'trending-grid');
+        renderAnime(animeData, 'latest-grid');
+
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        loadMoreBtn.addEventListener('click', () => {
+            const newAnimeData = [
+                { id: 11, title: 'Spy x Family', episode: 37, thumbnail: 'https://cdn.myanimelist.net/images/anime/1764/126627.jpg' },
+                { id: 12, title: 'Vinland Saga', episode: 48, thumbnail: 'https://cdn.myanimelist.net/images/anime/1500/134988.jpg' },
+            ];
+
+            const latestGrid = document.getElementById('latest-grid');
+            newAnimeData.forEach(anime => {
+                latestGrid.appendChild(createAnimeCard(anime));
+            });
+
+            loadMoreBtn.style.display = 'none';
+        });
+
+        // Upload button simulation
+        const uploadBtn = document.getElementById('upload-btn');
+        uploadBtn.addEventListener('click', () => {
+            alert('To upload a real video, you need a backend server and a database. This is a front-end simulation.');
+        });
+    </script>
+</body>
+</html>
