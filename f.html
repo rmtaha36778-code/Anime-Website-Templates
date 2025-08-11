@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimeStream - Watch Your Favorite Anime Online</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General Styles */
+        :root {
+            --bg-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --secondary-text-color: #a0a0a0;
+            --accent-color: #ff5252;
+            --accent-hover: #e64a4a;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --header-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--card-bg-color);
+            border-bottom: 1px solid #333;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: var(--header-height);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo a {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-item {
+            margin: 0 1rem;
+        }
+
+        .nav-item a {
+            padding: 10px;
+            display: block;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .nav-item a:hover {
+            color: var(--accent-color);
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input {
+            padding: 8px 12px;
+            border: 1px solid #444;
+            background-color: #2a2a2a;
+            color: var(--text-color);
+            border-radius: 5px 0 0 5px;
+            outline: none;
+            width: 250px;
+            transition: width 0.3s;
+        }
+        
+        .search-container input:focus {
+            width: 300px;
+        }
+
+        .search-container button {
+            background-color: var(--accent-color);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1300px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .content-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 1rem;
+        }
+
+        /* Anime Card Grid */
+        .anime-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .anime-card {
+            background-color: var(--card-bg-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .anime-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .anime-card-link {
+            display: block;
+        }
+        
+        .anime-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s;
+        }
+
+        .anime-card:hover .card-overlay {
+            opacity: 1;
+        }
+
+        .play-button {
+            font-size: 3rem;
+            color: #fff;
+        }
+
+        .card-info {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .card-info h3 {
+            font-size: 1.1rem;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-info p {
+            font-size: 0.9rem;
+            color: var(--secondary-text-color);
+        }
+
+        .load-more {
+            display: block;
+            width: fit-content;
+            margin: 2rem auto 0;
+            padding: 1rem 2rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .load-more:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--card-bg-color);
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid #333;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links li {
+            margin: 0 1rem;
+        }
+
+        .footer-links a {
+            color: var(--secondary-text-color);
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Modal Video Player */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 900px;
+            background-color: var(--card-bg-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .close-button {
+            color: white;
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 500px;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <a href="#">AnimeStream</a>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#">Home</a></li>
+                <li class="nav-item"><a href="#">Anime List</a></li>
+                <li class="nav-item"><a href="#">Genres</a></li>
+            </ul>
+        </nav>
+        <div class="search-container">
+            <input type="text" placeholder="Search for anime...">
+            <button><i class="fas fa-search"></i></button>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <section class="content-section">
+            <div class="section-header">
+                <h2>Trending Now</h2>
+            </div>
+            <div id="trending-grid" class="anime-grid">
+                </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-header">
+                <h2>Latest Episodes</h2>
+            </div>
+            <div id="latest-grid" class="anime-grid">
+                </div>
+            <button id="load-more-btn" class="load-more">Load More</button>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <ul class="footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">DMCA</a></li>
+        </ul>
+        <p>&copy; 2024 AnimeStream. All rights reserved.</p>
+    </footer>
+    
+    <div id="video-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Anime Title - Episode #</h2>
+            <div class="video-player">
+                <p>Simulated Video Player</p>
+                </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Array of dummy anime data
+        const animeData = [
+            { id: 1, title: 'Attack on Titan', episode: 88, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=AoT' },
+            { id: 2, title: 'Jujutsu Kaisen', episode: 24, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=JJK' },
+            { id: 3, title: 'One Piece', episode: 1080, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=OP' },
+            { id: 4, title: 'My Hero Academia', episode: 138, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=MHA' },
+            { id: 5, title: 'Demon Slayer', episode: 44, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=DS' },
+            { id: 6, title: 'Chainsaw Man', episode: 12, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=CSM' },
+            { id: 7, title: 'Hunter x Hunter', episode: 148, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=HxH' },
+            { id: 8, title: 'Naruto Shippuden', episode: 500, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=Naruto' },
+            { id: 9, title: 'Dragon Ball Z', episode: 291, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=DBZ' },
+            { id: 10, title: 'Fullmetal Alchemist: Brotherhood', episode: 64, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=FMA' },
+        ];
+
+        // Function to create an anime card HTML element
+        function createAnimeCard(anime) {
+            const card = document.createElement('div');
+            card.classList.add('anime-card');
+            card.innerHTML = `
+                <a href="#" class="anime-card-link" data-id="${anime.id}">
+                    <img src="${anime.img}" alt="${anime.title}">
+                    <div class="card-overlay">
+                        <i class="fas fa-play-circle play-button"></i>
+                    </div>
+                </a>
+                <div class="card-info">
+                    <h3>${anime.title}</h3>
+                    <p>Episode ${anime.episode}</p>
+                </div>
+            `;
+            return card;
+        }
+
+        // Function to render anime cards to a specific grid
+        function renderAnime(data, gridId) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            data.forEach(anime => {
+                grid.appendChild(createAnimeCard(anime));
+            });
+        }
+        
+        // Initial render for both sections
+        renderAnime(animeData.slice(0, 5), 'trending-grid');
+        renderAnime(animeData, 'latest-grid');
+
+        // Load more functionality
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        let currentItems = 10;
+        const itemsPerLoad = 5;
+
+        loadMoreBtn.addEventListener('click', () => {
+            // In a real app, this would fetch new data from the server
+            const newAnimeData = [
+                { id: 11, title: 'Spy x Family', episode: 37, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=SxS' },
+                { id: 12, title: 'Vinland Saga', episode: 48, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=VS' },
+                { id: 13, title: 'One Punch Man', episode: 24, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=OPM' },
+                { id: 14, title: 'Death Note', episode: 37, img: 'https://via.placeholder.com/250x350/ff5252/000000?text=DN' },
+            ];
+
+            const latestGrid = document.getElementById('latest-grid');
+            newAnimeData.forEach(anime => {
+                latestGrid.appendChild(createAnimeCard(anime));
+            });
+
+            // Hide the button if no more items to load
+            loadMoreBtn.style.display = 'none';
+        });
+
+        // Modal Video Player Logic
+        const videoModal = document.getElementById('video-modal');
+        const closeModal = document.querySelector('.close-button');
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.anime-card-link')) {
+                e.preventDefault();
+                videoModal.style.display = 'flex';
+                // In a real app, you would use the data-id to fetch episode details
+                const animeTitle = e.target.closest('.anime-card').querySelector('h3').textContent;
+                const episode = e.target.closest('.anime-card').querySelector('p').textContent;
+                document.querySelector('.modal-content h2').textContent = ${animeTitle} - ${episode};
+            }
+        });
+
+        closeModal.addEventListener('click', () => {
+            videoModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === videoModal) {
+                videoModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
