@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+ <html lang="en"> 
+    <head> 
+        <meta charset="UTF-8" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
+        <title>Anime Library — All Series</title> 
+        <style> 
+        :root{ --bg: #0e0f14; --card: #171a21; --muted: #8a939e; --text: #e8eef8; --accent: #6cc6ff; --shadow: 0 6px 20px rgba(0,0,0,.25); } *{box-sizing:border-box} html,body{margin:0;padding:0;height:100%} body{ font-family: Inter, ui-sans-serif, system-ui, -apple-system; background: radial-gradient(circle at 20% -10%, rgba(108,198,255,.15) 0%, transparent 40%), radial-gradient(circle at 100% 0%, rgba(108,198,255,.10) 0%, transparent 40%), var(--bg); color: var(--text); min-height:100%; }
+         header{ position: sticky; top:0; z-index: 10; background: rgba(15,15,20,.92); border-bottom: 1px solid rgba(255,255,255,.05); padding: 14px 20px; display:flex; align-items:center; justify-content:space-between; webkit-backdrop-filter: blur(6px); } 
+         .brand{font-weight:700; letter-spacing:.5px} 
+         .search{ display:flex; gap:8px; align-items:center} 
+         .search input{ width: 260px; max-width: 60vw; padding:10px 12px; border-radius:8px; border:1px solid #2b3240; background:#0b0d14; color:#fff; } 
+         .container{ padding: 20px; max-width:1100px; margin:0 auto}
+          .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap:18px; } 
+          .card{ background: linear-gradient(#1a1e28, #141923); border-radius:14px; overflow:hidden; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,.05); display:flex; flex-direction:column; } 
+          .poster{ width:100%; height:0; padding-bottom: 140%; position:relative; background:#333; } 
+          .poster img{ position:absolute; width:100%; height:100%; object-fit:cover; top:0; left:0; } 
+          .card-body{ padding:12px 12px 14px; display:flex; flex-direction:column; gap:8px; } 
+          .title{ font-size: 15px; font-weight: 600; line-height: 1.25; }
+           .meta{ color:var(--muted); font-size:12.5px} 
+           .btn{ align-self:flex-start; padding:8px 12px; border-radius:6px; border:1px solid #2d3950; background: #1e2a43; color:#eaf6ff; cursor:pointer; font-size:13px; } 
+           .btn:hover{ background:#283056; } 
+           .episodes{ display:none; padding:0 12px 12px; } 
+           .ep{ display:flex; justify-content:space-between; padding:6px 0; font-family: ui-monospace,SFMono-Regular,monospace; font-size:12.5px; color:#e9f0ff; } 
+           .tag{ display:inline-block; padding:2px 6px; border-radius:999px; font-size:11px; background:#2a3244; color:#cfe4ff; } 
+           @media (max-width: 600px)
+           { .search input{ width: 100%; } } 
+           </style>
+            </head>
+             <body>
+                 <header>
+                     <div class="brand">Anime Gallery</div>
+                      <div class="search" aria-label="Search anime">
+                         <input type="text" id="searchBox" placeholder="Search by title..."/>
+                         </div>
+                         </header> 
+                         <main class="container" aria-label="Anime catalog"> 
+                            <section id="gallery" class="grid" aria-label="Anime grid"> <!-- Cards will be injected here --> </section>
+                         </main>
+                          <script> // Sample data: replace or extend with your own entries const animeData = [ { title: "Fullmetal Alchemist: Brotherhood", year: 2009, poster: "https://images.unsplash.com/photo-1517604936365-9e5c7ed8b8b0?q=80&w=1200&auto=format&fit=crop", tags: ["Adventure","Fantasy","Alchemy"], episodes: [ { ep: 1, title: "The Way of the Fool" }, { ep: 2, title: "The Phosphorus Mine" }, { ep: 3, title: "A Temperamental Horse" }, // add more ] }, { title: "Attack on Titan", year: 2013, poster: "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=1200&auto=format&fit=crop", tags: ["Action","Drama","Dark Fantasy"], episodes: [ { ep: 1, title: "To You, in 2000 Years" }, { ep: 2, title: "That Day: The Fall of Shiganshina, Part 1" }, { ep: 3, title: "A Dim Light in the Darkness" }, ] }, { title: "My Hero Academia", year: 2016, poster: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200&auto=format&fit=crop", tags: ["Action","School","Superpowers"], episodes: [ { ep: 1, title: "Izuku Midoriya: Origin" }, { ep: 2, title: "What It Takes to be a Hero" }, { ep: 3, title: "Roaring Sports Festival" }, ] }, { title: "One Piece", year: 1999, poster: "https://images.unsplash.com/photo-1523419409542-5ef23dc6f7a8?q=80&w=1200&auto=format&fit=crop", tags: ["Adventure","Pirates","Long-Running"], episodes: [ { ep: 1, title: "I'm Luffy! The Man Who's Gonna Be King of the Pirates!" }, { ep: 2, title: "Enter the Great Swordsman! Pirate Hunter Roronoa Zoro!" }, ] } ]; const gallery = document.getElementById('gallery'); const searchBox = document.getElementById('searchBox'); function createCard(item, index){ const card = document.createElement('article'); card.className = 'card'; // Poster const posterWrap = document.createElement('div'); posterWrap.className = 'poster'; const img = document.createElement('img'); img.src = item.poster; img.alt = item.title + ' poster'; posterWrap.appendChild(img); card.appendChild(posterWrap); // Body const body = document.createElement('div'); body.className = 'card-body'; const title = document.createElement('div'); title.className = 'title'; title.textContent = item.title; const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = item.year + " • " + item.tags.join(' · '); const toggle = document.createElement('button'); toggle.className = 'btn'; toggle.textContent = 'Show Episodes'; toggle.setAttribute('aria-expanded', 'false'); toggle.onclick = () => { const expanded = toggle.getAttribute('aria-expanded') === 'true'; episodesDiv.style.display = expanded ? 'none' : 'block'; toggle.setAttribute('aria-expanded', String(!expanded)); toggle.textContent = expanded ? 'Show Episodes' : 'Hide Episodes'; }; // Episodes list const episodesDiv = document.createElement('div'); episodesDiv.className = 'episodes'; item.episodes.forEach(ep => { const row = document.createElement('div'); row.className = 'ep'; const left = document.createElement('span'); left.textContent = `Ep ${ep.ep}: ${ep.title}`; const right = document.createElement('span'); right.textContent = ''; // placeholder for duration or status row.appendChild(left); row.appendChild(right); episodesDiv.appendChild(row); }); body.appendChild(title); body.appendChild(meta); body.appendChild(toggle); body.appendChild(episodesDiv); card.appendChild(body); return card; } function renderFilter(results){ gallery.innerHTML = ''; if (results.length === 0){ const msg = document.createElement('div'); msg.textContent = 'No results found.'; msg.style.color = '#fff'; gallery.appendChild(msg); return; } results.forEach((item, idx) => { const card = createCard(item, idx); gallery.appendChild(card); }); } function applySearch(query){ const q = query.trim().toLowerCase(); if (!q) return animeData; return animeData.filter(a => a.title.toLowerCase().includes(q) || a.tags.join(' ').toLowerCase().includes(q)); } // Initial render renderFilter(animeData); // Search handler searchBox.addEventListener('input', (e) => { const results = applySearch(e.target.value); renderFilter(results); }); </script>
+                         </body>
+                          </html>
